@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include <string>
-#include "exceptions.h"
-#include "util.h"
+#include "../exceptions.h"
+#include "../util.h"
+#include "../io.h"
 #include <vector>
 #ifdef __linux__
 #include <sys/socket.h>
@@ -39,6 +40,7 @@
 #define SIZEOFETH 14
 #define SIZEOFIPV4 24
 #define SIZEOFTCP 20
+#define SIZEOFICMP 8
 
 #define LOCALDEFAULT (uint32_t)0x7f000001
 #define RESERVED1 (uint32_t)0x00000000
@@ -47,6 +49,12 @@
 #define RESERVED2RANGE 16
 #define RESERVED3 (uint32_t)0xf0000000
 #define RESERVED3RANGE 4
+
+#define NONE -1
+#define ETH 0
+#define IPV4 1
+#define TCP 2
+#define ICMP 3
 
 #ifdef _WIN32
 
@@ -73,36 +81,27 @@ namespace tools
     namespace networking
     {
 
-        struct TCPPacket
+        struct ICMPPacket
         {
-            uint16_t source;
-            uint16_t dest;
-            uint32_t sequencenumber;
-            uint32_t acknumber;
-            unsigned char offset;
-            unsigned char flags;
-            uint16_t window;
+            unsigned char type;
+            unsigned char code;
             uint16_t checksum;
-            uint16_t urgentptr;
-            unsigned char *options;
-            unsigned char *data;
-            uint32_t truesize;
-            TCPPacket()
+            uint32_t extendedheader;
+            unsigned char* data;
+            uint32_t size;
+            ICMPPacket()
             {
                 ;
             }
-            ~TCPPacket()
+            ~ICMPPacket()
             {
-                delete[] this->options;
                 delete[] this->data;
             }
-            TCPPacket(const TCPPacket &packet)
+            ICMPPacket(const ICMPPacket &packet)
             {
-                memcpy(this, &packet, SIZEOFTCP);
-                this->options = new unsigned char[packet.offset - SIZEOFTCP];
-                memcpy(this->options, packet.options, packet.offset - SIZEOFTCP);
-                this->data = new unsigned char[packet.truesize - packet.offset];
-                memcpy(this->data, packet.data, packet.truesize - packet.offset);
+                memcpy(this, &packet, SIZEOFICMP);
+                this->data = new unsigned char[packet.size - SIZEOFICMP];
+                memcpy(this->data, packet.data, packet.size - SIZEOFICMP);
             }
             std::string ToString();
         };
@@ -136,7 +135,6 @@ namespace tools
                 this->data = new unsigned char[packet.length - SIZEOFIPV4];
                 memcpy(this->data, packet.data, packet.length - SIZEOFIPV4);
             }
-            TCPPacket GetTCP() const;
             std::string ToString();
         };
 
@@ -169,6 +167,7 @@ namespace tools
         class RawSocket
         {
         private:
+            char mac[6];
 #ifdef __linux__
             int32_t fd;
 #elif _WIN32
@@ -183,6 +182,11 @@ namespace tools
             EthernetFrame ReceivePacket();
             void SendPacketRaw(const std::vector<unsigned char> &packet);
             void SendPacket(const EthernetFrame &eth);
+            const char* GetMac() {return this->mac;}
         };
+
+        std::string GetDefaultInterface();
+
+        unsigned char* GetDeviceMac(std::string interface);
     }
 }

@@ -31,6 +31,7 @@ namespace tools
             }
             std::memcpy(ifr.ifr_name, _interface.c_str(), _interface.size() + 1);
             int err = ioctl(this->fd, SIOCGIFINDEX, &ifr);
+            std::memcpy(this->mac, ifr.ifr_hwaddr.sa_data, 6);
             if (err)
             {
                 throw NoInterfaceIndex("Could not get _interface index");
@@ -198,27 +199,7 @@ namespace tools
             ret.truesize = this->truesize - SIZEOFETH;
             return ret;
         }
-
-        TCPPacket IPv4Packet::GetTCP() const
-        {
-            TCPPacket ret;
-            std::memcpy(&ret, this->data, SIZEOFTCP);
-            ret.offset = ret.offset >> 4;
-            ret.options = new unsigned char[ret.offset - (SIZEOFTCP)];
-            std::memcpy(ret.options, this->data + (SIZEOFTCP), ret.offset - (SIZEOFTCP));
-            ret.truesize = this->truesize - SIZEOFIPV4;
-            if (ret.truesize < ret.offset)
-            {
-                throw NetworkSizeMismatch("offset is larger than the size of the data");
-            }
-            uint16_t remainingsize = ret.truesize - ret.offset;
-            ret.options = new unsigned char[remainingsize];
-            std::memcpy(ret.data, this->data + ret.offset, remainingsize - (SIZEOFTCP));
-            ret.source = htons(ret.source);
-            ret.dest = htons(ret.dest);
-            return ret;
-        }
-
+        
         std::string EthernetFrame::ToString()
         {
             std::string ret = "";
@@ -252,5 +233,21 @@ namespace tools
             std::memcpy(this->data, frame.data() + SIZEOFETH, frame.size() - (SIZEOFETH));
             this->truesize = frame.size();
         }
+#ifdef __linux__
+        std::string GetDefaultInterface() {
+            io::FileObject* procfileobj = io::GetFile("/proc/net/route");
+            io::GetFileContents(procfileobj);
+            io::File* procfile = static_cast<io::File*>(procfileobj);
+            if (procfile->contents.find("00000000") != std::string::npos) {
+                return procfile->contents.substr(procfile->contents.find('\n'), procfile->contents.find('\t'));
+            }
+            throw std::runtime_error("idk");
+        }
+
+        unsigned char* GetDeviceMac(std::string interface) {
+
+        }
+#elif _WIN32
+#endif
     }
 }

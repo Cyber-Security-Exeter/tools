@@ -24,14 +24,10 @@ namespace tools
         /// @brief Represents a regular file, extending FileObject with its contents
         struct File : public FileObject
         {
-            char *contents;        ///< Raw file contents buffer
-            int contentssize;      ///< Size of the contents buffer in bytes
+            std::string contents;        ///< Raw file contents buffer
             bool retrievedcontent; ///< true if the file contents have been loaded
 
-            ~File() override
-            {
-                delete this->contents;
-            }
+            ~File() = default;
 
             /// @brief Returns a human-readable summary of the file's metadata
             /// @return Formatted string with name, permissions, owner, and size
@@ -41,7 +37,7 @@ namespace tools
                 filerep += "Filename: " + name;
                 filerep += "\nPermissions: " + std::to_string(permissions);
                 filerep += "\nOwner: " + owner;
-                filerep += "\nSize: " + std::to_string(contentssize);
+                filerep += "\nSize: " + std::to_string(contents.length());
                 return filerep;
             }
         };
@@ -191,5 +187,10 @@ namespace tools
         /// @throws Unsupported if the file type is not a regular file or directory
         void MoveDirectory(std::string directory);
 
+        void GetFileContents(FileObject *file);
+        std::string GetFileContentsString(FileObject *file);
+
+        void GetFileContents(std::string directory, FileObject* outfile);
+        std::string GetFileContentsString(std::string directory);
     }
 }

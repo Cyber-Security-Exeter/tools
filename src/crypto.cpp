@@ -107,8 +107,10 @@ namespace tools
         
         template void RSAEncrypt(int &message, RSAPublicKey key);
         template void RSAEncrypt(unsigned int &message, RSAPublicKey key);
+        template void RSAEncrypt(unsigned char &message, RSAPublicKey key);
         template void RSADecrypt(int &message, RSAPrivateKey key);
         template void RSADecrypt(unsigned int &message, RSAPrivateKey key);
+        template void RSADecrypt(unsigned char &message, RSAPrivateKey key);
 
         std::pair<NTRUPublicKey, NTRUPrivateKey> NTRUGenerateKeyPair(int p, int q) {
             ;

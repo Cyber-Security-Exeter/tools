@@ -269,5 +269,27 @@ namespace tools
             Folder *collapsedfolder = static_cast<Folder *>(folder);
             std::filesystem::current_path(directory);
         }
+
+        void GetFileContents(FileObject *file)
+        {
+            if (!file->isfile) {
+                throw InvalidFileType("Specified directory is not a file");
+            }
+            if (!std::filesystem::exists(file->name)) {
+                throw FileDoesntExist("Specified file does not exist");
+            }
+            if (!CanRead(GetCurrentUser(), file->name)) {
+                throw ReadNotPermitted("You do not have permissions to read specified file");
+            }
+            File *accfile = static_cast<File *>(file);
+            std::ifstream fd(file->name);
+            if (!fd.is_open()) {
+                throw ReadNotPermitted("An error occured when opening the specified file");
+            }
+            std::string out = std::string();
+            std::ostringstream sstr;
+            sstr << fd.rdbuf();
+            accfile->contents = sstr.str();
+        }
     }
 }

@@ -3,7 +3,8 @@
 #include "../src/command.h"
 #include "../src/crypto.h"
 #include "../src/util.h"
-#include "../src/networking.h"
+#include "../src/networking/networking.h"
+#include "../src/networking/tcp.h"
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <cstring>
@@ -270,7 +271,6 @@ TEST_CASE("File ToString contains name, permissions, owner, and size")
     f.name = "myfile.txt";
     f.permissions = 644;
     f.owner = "bob";
-    f.contentssize = 1024;
     f.contents = nullptr;
     f.retrievedcontent = false;
     std::string s = f.ToString();
