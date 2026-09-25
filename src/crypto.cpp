@@ -278,6 +278,16 @@ namespace tools
             delete[] roundkeys;
         }
 
+        int EncryptAES128(unsigned char *&data, unsigned char *key, int size) {
+            unsigned char *encdata = new unsigned char[size + (16 - size % 16)];
+            memcpy(encdata, data, size);
+            for (int i = 0; i * 16 < size; i++) {
+                EncryptAES128(&encdata[i * 16], key);
+            }
+            data = encdata;
+            return size + (16 - size % 16);
+        }
+
         void InvSubBytes128(unsigned char *data) {
             for (int i = 0; i < 16; i++)
             {
@@ -294,6 +304,7 @@ namespace tools
                 }
             }
         }
+
         void InvMixColumns128(unsigned char *data) {
             for (int i = 0; i < 4; i++) {
                 unsigned char a0 = data[i * 4];
@@ -322,6 +333,12 @@ namespace tools
             }
             AddRoundKey128(data, roundkeys);
             delete[] roundkeys;
+        }
+        
+        void DecryptAES128(unsigned char *data, unsigned char *key, int size) {
+            for (int i = 0; i * 16 < size; i++) {
+                DecryptAES128(&data[i * 16], key);
+            }
         }
 
         AESState AESPRNGInit(uint32_t seed)

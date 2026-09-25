@@ -71,11 +71,13 @@ namespace tools
         void ShiftRows128(unsigned char *data);
         void MixColumns128(unsigned char *data);
         void EncryptAES128(unsigned char *data, unsigned char *key);
+        int EncryptAES128(unsigned char *&data, unsigned char *key, int size);
 
         void InvSubBytes128(unsigned char *data);
         void InvShiftRows128(unsigned char *data);
         void InvMixColumns128(unsigned char *data);
         void DecryptAES128(unsigned char *data, unsigned char *key);
+        void DecryptAES128(unsigned char *data, unsigned char *key, int size);
 
         void CTRDRBGUpdate(AESState &state, uint8_t seedmaterial[]);
         AESState AESPRNGInit(uint32_t seed);

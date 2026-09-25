@@ -43,17 +43,27 @@ namespace tools
             send(this->_socket, message, size, 0);
         }
 
+        void IPv4TCPConnection::Close() {
+            close(this->_socket);
+        }
+
         IPv4TCPClientSocket::IPv4TCPClientSocket(const char* dest, uint16_t port) {
             this->_socket = socket(AF_INET, SOCK_STREAM, 0);
             memset(&this->addr, 0, sizeof(this->addr));
             this->addr.sin_family = AF_INET;
             this->addr.sin_port = htons(port);
             if (inet_pton(AF_INET, dest, &this->addr.sin_addr) <= 0) {
-                fprintf(stderr, "socket() failed1: %s\n", strerror(errno));
+                fprintf(stderr, "socket() failed: %s\n", strerror(errno));
             }
             if (connect(this->_socket, (struct sockaddr*)&this->addr, sizeof(this->addr)) == -1) {
-                fprintf(stderr, "socket() failed2: %s\n", strerror(errno));
+                fprintf(stderr, "socket() failed: %s\n", strerror(errno));
             }
+        }
+
+        unsigned char* IPv4TCPClientSocket::Receive(int size) {
+            unsigned char* buff = new unsigned char[size];
+            recv(this->_socket, buff, size, 0);
+            return buff;
         }
 
         void IPv4TCPClientSocket::Close() {

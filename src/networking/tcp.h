@@ -85,6 +85,7 @@ namespace tools
                 IPv4TCPClientSocket(const char* dest, uint16_t port);
                 ~IPv4TCPClientSocket() {}
                 void Send(const char *message, int size);
+                unsigned char* Receive(int amount);
                 void Close();
         };
 

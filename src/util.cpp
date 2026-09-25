@@ -229,6 +229,7 @@ namespace tools
         }
         template int PowerMod<int>(int base, int expo, int m);
         template unsigned int PowerMod<unsigned int>(unsigned int base, unsigned int expo, unsigned int m);
+        template unsigned char PowerMod<unsigned char>(unsigned char base, unsigned char expo, unsigned char m);
         template <typename T>
         T ModInverse(T e, T phi) {
             for (int d = 2; d < phi; d++) {
@@ -239,5 +240,14 @@ namespace tools
             return -1;
         }
         template int ModInverse<int>(int e, int phi);
+
+        uint64_t rand_uint64() {
+            uint64_t r = 0;
+            for (int i=0; i<64; i += 15 /*30*/) {
+                r = r*((uint64_t)RAND_MAX + 1) + rand();
+            }
+            return r;
+        }
+
     }
 }

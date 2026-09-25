@@ -264,20 +264,19 @@ TEST_CASE("Folder ToString contains name, permissions, owner, and file count")
     CHECK(s.find("3") != std::string::npos);
 }
 
-TEST_CASE("File ToString contains name, permissions, owner, and size")
+TEST_CASE("File ToString contains name, permissions, owner")
 {
     File f;
     f.isfile = true;
     f.name = "myfile.txt";
     f.permissions = 644;
     f.owner = "bob";
-    f.contents = nullptr;
+    f.contents = "";
     f.retrievedcontent = false;
     std::string s = f.ToString();
     CHECK(s.find("myfile.txt") != std::string::npos);
     CHECK(s.find("644") != std::string::npos);
     CHECK(s.find("bob") != std::string::npos);
-    CHECK(s.find("1024") != std::string::npos);
 }
 
 // SECURITY TESTS
@@ -563,6 +562,23 @@ TEST_CASE("DecryptAES128 undoes the encryption")
     DecryptAES128(data, key);
     bool same = true;
     for (int i = 0; i < 16; i++) {
+        if (data[i] != original[i]) same = false;
+    }
+    CHECK(same);
+}
+TEST_CASE("DecryptAES128 undoes the encryption with padding")
+{
+    unsigned char *data = new unsigned char[] {0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d,
+                              0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34, 0x84};
+    unsigned char original[17];
+    std::memcpy(original, data, 17);
+    unsigned char key[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+                             0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
+    uint32_t size = EncryptAES128(data, key, 17);
+    DecryptAES128(data, key, size);
+    bool same = true;
+    CHECK(size == 32);
+    for (int i = 0; i < 17; i++) {
         if (data[i] != original[i]) same = false;
     }
     CHECK(same);

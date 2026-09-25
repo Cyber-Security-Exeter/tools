@@ -38,5 +38,7 @@ namespace tools
         T PowerMod(T base, T expo, T m);
         template <typename T>
         T ModInverse(T e, T phi);
+
+        uint64_t rand_uint64();
     }
 }
